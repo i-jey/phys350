@@ -1,12 +1,29 @@
 var time_step = 0.001; 
+var clock = 0; 
+var FINAL_TIME = 1; 
 
-function body(x0, y0, mass, initial_velocity_x, initial_velocity_y, color_num) { 
-    this.x = x0; 
-    this.y = y0; 
+function body(r0, theta_0, mass, initial_velocity_x, initial_velocity_y, color_num) { 
+    this.x = r0*cos(theta_0)+width/2; 
+    this.y = r0*sin(theta_0)+height/2;
+    console.log(this.x, this.y); 
     this.mass = mass; 
     this.vx = initial_velocity_x;
     this.vy = initial_velocity_y; 
     var positions = [[]]; 
+
+    // analytic 
+    var distance_to_center = r0;
+    var magnitude_v0 = pow(initial_velocity_x*initial_velocity_x + initial_velocity_y*initial_velocity_y, 0.5);
+    this.l = 3*this.mass*distance_to_center*magnitude_v0; 
+    var alpha = gravity_const*this.mass/pow(3, 0.5); 
+    this.energy = (3/2)*this.mass*magnitude_v0*magnitude_v0 - alpha/(distance_to_center*pow(3, 0.5)); 
+    this.p = this.l*this.l/(this.mass*alpha); 
+
+    this.analytic = function(theta) { 
+        var radius = this.p/1000000000; 
+        this.x = radius*cos(theta+theta_0) + width/2; 
+        this.y = radius*sin(theta+theta_0) + height/2; 
+    }
 
     this.update = function(force_x, force_y) { 
         var xAcceleration = force_x/this.mass; 
@@ -47,16 +64,24 @@ function body(x0, y0, mass, initial_velocity_x, initial_velocity_y, color_num) {
 
 const width = 1500; 
 const height = 1500; 
-
+const gravity_const = 1; 
+var speed1 = 450; 
+var speed2x = 225; 
+var speed2y = 390; 
+var speed3x = 225; 
+var speed3y = 390; 
 let buffer; 
 function setup() { 
     createCanvas(width, height); 
     buffer = createGraphics(width, height); 
     buffer.background(255); 
     // old masses 100000000 10000000000 100000000
-    body1 = new body(800, 600, 750000000000000000, 0, 0, 1); // BLUE
-    body2 = new body(650, 600, 1000000000000000000, 0, 0, 2); // RED
-    body3 = new body(800, 800, 1000000000000000000, 0, 3); // GREEN
+    // body1 = new body(750, 600, 750000000000000000, 0, 0, 1); // BLUE
+    // body2 = new body(650, 600, 1000000000000000000, 0, 0, 2); // RED
+    // body3 = new body(725, 730, 1000000000000000000, 0, 3); // GREEN
+    body1 = new body(100, 0, 41500000, -speed1, 0, 1); // BLUE
+    body2 = new body(100, 2*Math.PI/3, 41500000, speed2x, speed2y, 2); // RED
+    body3 = new body(100, 4*Math.PI/3, 41500000, speed3x, -speed3y, 3); // GREEN
 }
 
 // takes in initial forces, sets new x and y for each body
@@ -234,7 +259,6 @@ function rk4(force1_x, force1_y, force2_x, force2_y, force3_x, force3_y) {
 }
 
 function force(mass1, mass2, x1, y1, x2, y2) { 
-    const gravity_const = 6.674*Math.pow(10, -11); 
     var force = 1*gravity_const*mass1*mass2 / (epsilon + Math.pow(x2-x1, 2)+Math.pow(y2-y1, 2));
     return force; 
 }
@@ -292,19 +316,29 @@ function time_step_adjustor(x1, y1, x2, y2, x3, y3) {
 }
 var epsilon = 1000;
 var totalForces = new Array(6); 
+var theta = 0; 
+var counter = 0; 
 function draw() { 
     // background(255); 
     // time_step_adjustor(body1.x, body1.y, body2.x, body2.y, body3.x, body3.y); 
+
+    // var force12 = force(body1.mass, body2.mass, body1.x, body1.y, body2.x, body2.y); 
+    // var force13 = force(body1.mass, body3.mass, body1.x, body1.y, body3.x, body3.y); 
+    // var force23 = force(body2.mass, body3.mass, body2.x, body2.y, body3.x, body3.y); 
+    // totalForces = totalForce(body1.x, body1.y, body2.x, body2.y, body3.x, body3.y, force12, force13, force23); 
     
-    var force12 = force(body1.mass, body2.mass, body1.x, body1.y, body2.x, body2.y); 
-    var force13 = force(body1.mass, body3.mass, body1.x, body1.y, body3.x, body3.y); 
-    var force23 = force(body2.mass, body3.mass, body2.x, body2.y, body3.x, body3.y); 
-    totalForces = totalForce(body1.x, body1.y, body2.x, body2.y, body3.x, body3.y, force12, force13, force23); 
-    
-    // rk4(totalForces[0], totalForces[1], totalForces[2], totalForces[3], totalForces[4], totalForces[5]); 
-    body1.update(totalForces[0], totalForces[1]); 
-    body2.update(totalForces[2], totalForces[3]); 
-    body3.update(totalForces[4], totalForces[5]);
+    // // rk4(totalForces[0], totalForces[1], totalForces[2], totalForces[3], totalForces[4], totalForces[5]); 
+    // body1.update(totalForces[0], totalForces[1]); 
+    // body2.update(totalForces[2], totalForces[3]); 
+    // body3.update(totalForces[4], totalForces[5]);
+    body1.analytic(theta); 
+    body2.analytic(theta); 
+    body3.analytic(theta); 
+    counter++; 
+
+    if (counter % 1 == 0){ 
+        theta += 0.01; 
+    }
 
     body1.show(); 
     body2.show();

@@ -1,4 +1,6 @@
-var time_step = 0.001; 
+var time_step = 0.0001; 
+var clock = 0; 
+var FINAL_TIME = 1; 
 
 function body(x0, y0, mass, initial_velocity_x, initial_velocity_y, color_num) { 
     this.x = x0; 
@@ -47,16 +49,24 @@ function body(x0, y0, mass, initial_velocity_x, initial_velocity_y, color_num) {
 
 const width = 1500; 
 const height = 1500; 
-
+const gravity_const = 1; 
+var speed1 = 450; 
+var speed2x = 225; 
+var speed2y = 390; 
+var speed3x = 225; 
+var speed3y = 390; 
 let buffer; 
 function setup() { 
     createCanvas(width, height); 
     buffer = createGraphics(width, height); 
     buffer.background(255); 
     // old masses 100000000 10000000000 100000000
-    body1 = new body(800, 600, 750000000000000000, 0, 0, 1); // BLUE
-    body2 = new body(650, 600, 1000000000000000000, 0, 0, 2); // RED
-    body3 = new body(800, 800, 1000000000000000000, 0, 3); // GREEN
+    // body1 = new body(750, 600, 750000000000000000, 0, 0, 1); // BLUE
+    // body2 = new body(650, 600, 1000000000000000000, 0, 0, 2); // RED
+    // body3 = new body(725, 730, 1000000000000000000, 0, 3); // GREEN
+    body1 = new body(750, 600, 41500000, -speed1, 0, 1); // BLUE
+    body2 = new body(620, 825, 41500000, speed2x, speed2y, 2); // RED
+    body3 = new body(880, 825, 41500000, speed3x, -speed3y, 3); // GREEN
 }
 
 // takes in initial forces, sets new x and y for each body
@@ -234,7 +244,6 @@ function rk4(force1_x, force1_y, force2_x, force2_y, force3_x, force3_y) {
 }
 
 function force(mass1, mass2, x1, y1, x2, y2) { 
-    const gravity_const = 6.674*Math.pow(10, -11); 
     var force = 1*gravity_const*mass1*mass2 / (epsilon + Math.pow(x2-x1, 2)+Math.pow(y2-y1, 2));
     return force; 
 }
@@ -295,7 +304,7 @@ var totalForces = new Array(6);
 function draw() { 
     // background(255); 
     // time_step_adjustor(body1.x, body1.y, body2.x, body2.y, body3.x, body3.y); 
-    
+
     var force12 = force(body1.mass, body2.mass, body1.x, body1.y, body2.x, body2.y); 
     var force13 = force(body1.mass, body3.mass, body1.x, body1.y, body3.x, body3.y); 
     var force23 = force(body2.mass, body3.mass, body2.x, body2.y, body3.x, body3.y); 
@@ -309,4 +318,5 @@ function draw() {
     body1.show(); 
     body2.show();
     body3.show(); 
+    console.log(body1.mass, body2.mass, body3.mass); 
 }
