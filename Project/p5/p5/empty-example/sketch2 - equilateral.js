@@ -1,6 +1,4 @@
 var time_step = 0.0001; 
-var clock = 0; 
-var FINAL_TIME = 1; 
 
 function body(x0, y0, mass, initial_velocity_x, initial_velocity_y, color_num) { 
     this.x = x0; 
@@ -13,6 +11,7 @@ function body(x0, y0, mass, initial_velocity_x, initial_velocity_y, color_num) {
     this.update = function(force_x, force_y) { 
         var xAcceleration = force_x/this.mass; 
         var yAcceleration = force_y/this.mass; 
+        // console.log(color_num, xAcceleration, yAcceleration); 
         this.vx = this.vx + xAcceleration*time_step; 
         this.vy = this.vy + yAcceleration*time_step; 
         this.x += this.vx*time_step; 
@@ -36,12 +35,12 @@ function body(x0, y0, mass, initial_velocity_x, initial_velocity_y, color_num) {
             fill(0, 250, 154);
             stroke(0, 250, 154); 
         }
-        if (positions.length > 50) { 
-            for (var i = positions.length-1; i > positions.length-50; i--) { 
-                strokeWeight(1); 
-                ellipse(positions[i][0], positions[i][1], 1, 1); 
-            }
-        }
+        // if (positions.length > 25) { 
+        //     for (var i = positions.length-1; i > positions.length-25; i--) { 
+        //         strokeWeight(1); 
+        //         ellipse(positions[i][0], positions[i][1], 1, 1); 
+        //     }
+        // }
         stroke(0); 
         ellipse(this.x, this.y, 5, 5); 
     }
@@ -50,11 +49,22 @@ function body(x0, y0, mass, initial_velocity_x, initial_velocity_y, color_num) {
 const width = 1500; 
 const height = 1500; 
 const gravity_const = 1; 
-var speed1 = 450; 
-var speed2x = 225; 
-var speed2y = 390; 
-var speed3x = 225; 
-var speed3y = 390; 
+
+var magSpeed = 500; 
+var rads_60 = Math.PI*60/180; 
+
+// red speed 
+var rSpeedX = magSpeed*Math.cos(rads_60); 
+var rSpeedY = magSpeed*Math.sin(rads_60); 
+
+// blue speed 
+var bSpeedX = 0; 
+var bSpeedY = -magSpeed; 
+
+// green speed
+var gSpeedX = -magSpeed*Math.sin(rads_60); 
+var gSpeedY = magSpeed*Math.cos(rads_60);
+
 let buffer; 
 function setup() { 
     createCanvas(width, height); 
@@ -64,183 +74,17 @@ function setup() {
     // body1 = new body(750, 600, 750000000000000000, 0, 0, 1); // BLUE
     // body2 = new body(650, 600, 1000000000000000000, 0, 0, 2); // RED
     // body3 = new body(725, 730, 1000000000000000000, 0, 3); // GREEN
-    body1 = new body(750, 600, 41500000, -speed1, 0, 1); // BLUE
-    body2 = new body(620, 825, 41500000, speed2x, speed2y, 2); // RED
-    body3 = new body(880, 825, 41500000, speed3x, -speed3y, 3); // GREEN
+    // body1 = new body(850, 750, 41500000, bSpeedX, bSpeedY, 1); // BLUE
+    // body2 = new body(700, 836.6025403784439, 41500000, rSpeedX, rSpeedY, 2); // RED
+    // body3 = new body(700, 663.3974596215562, 41500000, gSpeedX, gSpeedY, 3); // GREEN 
+    body1 = new body(800, 626.7949192, 41500000, -magSpeed, 0, 1); // BLUE
+    body2 = new body(700, 800, 41500000, magSpeed*Math.cos(Math.PI*30/180), magSpeed*Math.sin(Math.PI*30/180), 2); // RED
+    body3 = new body(900, 800, 41500000, -magSpeed*Math.sin(Math.PI*30/180), -magSpeed*Math.cos(Math.PI*30/180), 3); // GREEN 
 }
 
 // takes in initial forces, sets new x and y for each body
 function rk4(force1_x, force1_y, force2_x, force2_y, force3_x, force3_y) { 
-    /*
-        * An implementation of the fourth order Runge-Kutta method for numerical integration
-        * adapted for 2-dimensional orbit simulation 
-        * y_n+1 = y_n + time_step / 6 * (k1 + 2k2 + 2k3 + k4)
-        * k1 = f(t_n, y_n)
-        * k2 = f(t_n+timestep/2, y_n+k1*timestep/2)
-        * k3 = f(t_n+timestep/2, y_n+k2*timestep/2)
-        * k4 = f(t_n+timestep/2, y_n+k3*timestep)
-    */
     
-    // BODY 1
-    var xAcceleration = force1_x/body1.mass; 
-    var yAcceleration = force1_y/body1.mass; 
-    
-    var vx_k1 = xAcceleration; 
-    var vy_k1 = yAcceleration; 
-    var rx_k1 = body1.vx; 
-    var ry_k1 = body1.vy; 
-    var temp1_x = body1.x + rx_k1*time_step/2; 
-    var temp1_y = body1.y + ry_k1*time_step/2;
-
-    // recalculate forces 
-    var force12 = force(body1.mass, body2.mass, temp1_x, temp1_y, body2.x, body2.y); 
-    var force13 = force(body1.mass, body3.mass, temp1_x, temp1_y, body3.x, body3.y); 
-    var force23 = force(body2.mass, body3.mass, body2.x, body2.y, body3.x, body3.y); 
-
-    var newForces = totalForce_Selector(1, temp1_x, temp1_y, body2.x, body2.y, body3.x, body3.y, force12, force13, force23); 
-    var vx_k2 = newForces[0]/body1.mass; 
-    var vy_k2 = newForces[1]/body1.mass; 
-    var rx_k2 = body1.vx*abs(vx_k1)*time_step/2; 
-    var ry_k2 = body1.vy*abs(vy_k1)*time_step/2; 
-    temp1_x = body1.x + rx_k2*time_step/2; 
-    temp1_y = body1.y + ry_k2*time_step/2; 
-    
-    // recalculate forces 
-    var force12 = force(body1.mass, body2.mass, temp1_x, temp1_y, body2.x, body2.y); 
-    var force13 = force(body1.mass, body3.mass, temp1_x, temp1_y, body3.x, body3.y); 
-    var force23 = force(body2.mass, body3.mass, body2.x, body2.y, body3.x, body3.y); 
-
-    var newForces = totalForce_Selector(1, temp1_x, temp1_y, body2.x, body2.y, body3.x, body3.y, force12, force13, force23); 
-    var vx_k3 = newForces[0]/body1.mass; 
-    var vy_k3 = newForces[1]/body1.mass; 
-    var rx_k3 = body1.vx*abs(vx_k2)*time_step/2; 
-    var ry_k3 = body1.vy*abs(vy_k2)*time_step/2; 
-    temp1_x = body1.x + rx_k3*time_step; 
-    temp1_y = body1.y + ry_k3*time_step; 
-
-    // recalculate forces
-    force12 = force(body1.mass, body2.mass, temp1_x, temp1_y, body2.x, body2.y); 
-    force13 = force(body1.mass, body3.mass, temp1_x, temp1_y, body3.x, body3.y); 
-    force23 = force(body2.mass, body3.mass, body2.x, body2.y, body3.x, body3.y); 
-    var newForces = totalForce_Selector(1, temp1_x, temp1_y, body2.x, body2.y, body3.x, body3.y, force12, force13, force23); 
-    var vx_k4 = newForces[0]/body1.mass;
-    var vy_k4 = newForces[1]/body1.mass; 
-    var rx_k4 = body1.vx*abs(vx_k3)*time_step; 
-    var ry_k4 = body1.vx*abs(vy_k3)*time_step; 
-
-    body1.vx = body1.vx + time_step/6 * (vx_k1+2*vx_k2+2*vx_k3+vx_k4); 
-    body1.vy = body1.vy + time_step/6 * (vy_k1+2*vy_k2+2*vy_k3+vy_k4); 
-    body1.x = body1.x + time_step/6 * (rx_k1+2*rx_k2+2*rx_k3+rx_k4); 
-    body1.y = body1.y + time_step/6 * (ry_k1+2*ry_k2+2*ry_k3+ry_k4);  
-
-    // BODY 2
-    xAcceleration = force2_x/body2.mass; 
-    yAcceleration = force2_y/body2.mass; 
-    
-    vx_k1 = xAcceleration; 
-    vy_k1 = yAcceleration; 
-    rx_k1 = body2.vx; 
-    ry_k1 = body2.vy; 
-    temp1_x = body2.x + rx_k1*time_step/2; 
-    temp1_y = body2.y + ry_k1*time_step/2;
-
-    // recalculate forces 
-    force12 = force(body1.mass, body2.mass, body1.x, body1.y, temp1_x, temp1_y); 
-    force13 = force(body1.mass, body3.mass, body1.x, body1.y, body3.x, body3.y); 
-    force23 = force(body2.mass, body3.mass, temp1_x, temp1_y, body3.x, body3.y); 
-
-    newForces = totalForce_Selector(2, body1.x, body1.y, temp1_x, temp1_y, body3.x, body3.y, force12, force13, force23); 
-    vx_k2 = newForces[0]/body2.mass; 
-    vy_k2 = newForces[1]/body2.mass; 
-    rx_k2 = body2.vx*abs(vx_k1)*time_step/2; 
-    ry_k2 = body2.vy*abs(vy_k1)*time_step/2; 
-    temp1_x = body2.x + rx_k2*time_step/2; 
-    temp1_y = body2.y + ry_k2*time_step/2; 
-    
-    // recalculate forces 
-    force12 = force(body1.mass, body2.mass, body1.x, body1.y, temp1_x, temp1_y); 
-    force13 = force(body1.mass, body3.mass, body1.x, body1.y, body3.x, body3.y); 
-    force23 = force(body2.mass, body3.mass, temp1_x, temp1_y, body3.x, body3.y); 
-
-    newForces = totalForce_Selector(2, body1.x, body1.y, temp1_x, temp1_y, body3.x, body3.y, force12, force13, force23); 
-    vx_k3 = newForces[0]/body2.mass; 
-    vy_k3 = newForces[1]/body2.mass; 
-    rx_k3 = body2.vx*abs(vx_k2)*time_step/2; 
-    ry_k3 = body2.vy*abs(vy_k2)*time_step/2; 
-    temp1_x = body2.x+rx_k3*time_step; 
-    temp1_y = body2.y + ry_k3*time_step; 
-
-    // recalculate forces 
-    force12 = force(body1.mass, body2.mass, body1.x, body1.y, temp1_x, temp1_y); 
-    force13 = force(body1.mass, body3.mass, body1.x, body1.y, body3.x, body3.y); 
-    force23 = force(body2.mass, body3.mass, temp1_x, temp1_y, body3.x, body3.y); 
-    
-    newForces = totalForce_Selector(2, body1.x, body1.y, temp1_x, temp1_y, body3.x, body3.y, force12, force13, force23); 
-    vx_k4 = newForces[0]/body2.mass;
-    vy_k4 = newForces[1]/body2.mass; 
-    rx_k4 = body2.vx*abs(vx_k3)*time_step; 
-    ry_k4 = body2.vx*abs(vy_k3)*time_step; 
-
-    body2.vx = body2.vx + time_step/6 * (vx_k1+2*vx_k2+2*vx_k3+vx_k4); 
-    body2.vy = body2.vy + time_step/6 * (vy_k1+2*vy_k2+2*vy_k3+vy_k4); 
-    body2.x = body2.x + time_step/6 * (rx_k1+2*rx_k2+2*rx_k3+rx_k4); 
-    body2.y = body2.y + time_step/6 * (ry_k1+2*ry_k2+2*ry_k3+ry_k4);  
-
-    // BODY 3
-    xAcceleration = force3_x/body3.mass; 
-    yAcceleration = force3_y/body3.mass; 
-    
-    vx_k1 = xAcceleration; 
-    vy_k1 = yAcceleration; 
-    rx_k1 = body3.vx; 
-    ry_k1 = body3.vy; 
-    temp1_x = body3.x + rx_k1*time_step/2; 
-    temp1_y = body3.y + ry_k1*time_step/2;
-
-    // recalculate forces 
-    force12 = force(body1.mass, body2.mass, body1.x, body1.y, body2.x, body2.y); 
-    force13 = force(body1.mass, body3.mass, body1.x, body1.y, temp1_x, temp1_y); 
-    force23 = force(body2.mass, body3.mass, body2.x, body2.y, temp1_x, temp1_y); 
-    
-    newForces = totalForce_Selector(3, body1.x, body1.y, body2.x, body2.y, temp1_x, temp1_y, force12, force13, force23); 
-    vx_k2 = newForces[0]/body3.mass; 
-    vy_k2 = newForces[1]/body3.mass; 
-    // if (body2.vx > 0 && vx_k1 < 0 || body2.vx < 0 && vx_1 > 0) { 
-
-    // }
-    rx_k2 = body2.vx*abs(vx_k1)*time_step/2; 
-    ry_k2 = body2.vy*abs(vy_k1)*time_step/2; 
-    temp1_x = body3.x + rx_k2*time_step/2; 
-    temp1_y = body3.y + ry_k2*time_step/2; 
-    
-    // recalculate forces 
-    force12 = force(body1.mass, body2.mass, body1.x, body1.y, body2.x, body2.y); 
-    force13 = force(body1.mass, body3.mass, body1.x, body1.y, temp1_x, temp1_y); 
-    force23 = force(body2.mass, body3.mass, body2.x, body2.y, temp1_x, temp1_y); 
-    
-    newForces = totalForce_Selector(3, body1.x, body1.y, body2.x, body2.y, temp1_x, temp1_y, force12, force13, force23); 
-    vx_k3 = newForces[0]/body3.mass; 
-    vy_k3 = newForces[1]/body3.mass; 
-    rx_k3 = body3.vx*abs(vx_k2)*time_step/2; 
-    ry_k3 = body3.vy*abs(vy_k2)*time_step/2; 
-    temp1_x = body3.x + rx_k3*time_step; 
-    temp1_y = body3.y + ry_k3*time_step; 
-
-    // recalculate forces 
-    force12 = force(body1.mass, body2.mass, body1.x, body1.y, body2.x, body2.y); 
-    force13 = force(body1.mass, body3.mass, body1.x, body1.y, temp1_x, temp1_y); 
-    force23 = force(body2.mass, body3.mass, body2.x, body2.y, temp1_x, temp1_y); 
-    
-    newForces = totalForce_Selector(3, body1.x, body1.y, body2.x, body2.y, temp1_x, temp1_y, force12, force13, force23); 
-    vx_k4 = newForces[0]/body3.mass;
-    vy_k4 = newForces[1]/body3.mass; 
-    rx_k4 = body3.vx*abs(vx_k3)*time_step; 
-    ry_k4 = body3.vx*abs(vy_k3)*time_step; 
-
-    body3.vx = body3.vx + time_step/6 * (vx_k1+2*vx_k2+2*vx_k3+vx_k4); 
-    body3.vy = body3.vy + time_step/6 * (vy_k1+2*vy_k2+2*vy_k3+vy_k4); 
-    body3.x = body3.x + time_step/6 * (rx_k1+2*rx_k2+2*rx_k3+rx_k4); 
-    body3.y = body3.y + time_step/6 * (ry_k1+2*ry_k2+2*ry_k3+ry_k4);
 }
 
 function force(mass1, mass2, x1, y1, x2, y2) { 
@@ -290,21 +134,13 @@ function totalForce_Selector(bodyNum, x1, y1, x2, y2, x3, y3, force12, force13, 
         return [totalForces[4], totalForces[5]]; 
     }
 }
-function time_step_adjustor(x1, y1, x2, y2, x3, y3) { 
-    console.log(x1, x2, x3); 
-    if ((abs(x1-x2) < 5 && abs(y1-y2) < 5) || (abs(x1-x3) < 5 && abs(y1-y3) < 5) || (abs(x2-x3) < 5 && abs(y2-y3) < 5)) { 
-        time_step = 0.0001; 
-    } 
-    else { 
-        time_step = 0.001; 
-    }
-}
-var epsilon = 1000;
+
+var epsilon = 10;
 var totalForces = new Array(6); 
+var counter = 0; 
 function draw() { 
     // background(255); 
-    // time_step_adjustor(body1.x, body1.y, body2.x, body2.y, body3.x, body3.y); 
-
+    console.log(body1.vy); 
     var force12 = force(body1.mass, body2.mass, body1.x, body1.y, body2.x, body2.y); 
     var force13 = force(body1.mass, body3.mass, body1.x, body1.y, body3.x, body3.y); 
     var force23 = force(body2.mass, body3.mass, body2.x, body2.y, body3.x, body3.y); 
@@ -315,8 +151,10 @@ function draw() {
     body2.update(totalForces[2], totalForces[3]); 
     body3.update(totalForces[4], totalForces[5]);
 
-    body1.show(); 
-    body2.show();
-    body3.show(); 
-    console.log(body1.mass, body2.mass, body3.mass); 
+    if (counter % 1 == 0) { 
+        body1.show(); 
+        body2.show();
+        body3.show(); 
+    }
+    counter++; 
 }

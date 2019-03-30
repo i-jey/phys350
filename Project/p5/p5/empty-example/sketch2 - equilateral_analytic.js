@@ -5,7 +5,7 @@ var FINAL_TIME = 1;
 function body(r0, theta_0, mass, initial_velocity_x, initial_velocity_y, color_num) { 
     this.x = r0*cos(theta_0)+width/2; 
     this.y = r0*sin(theta_0)+height/2;
-    console.log(this.x, this.y); 
+    // console.log(this.x, this.y); 
     this.mass = mass; 
     this.vx = initial_velocity_x;
     this.vy = initial_velocity_y; 
@@ -17,10 +17,23 @@ function body(r0, theta_0, mass, initial_velocity_x, initial_velocity_y, color_n
     this.l = 3*this.mass*distance_to_center*magnitude_v0; 
     var alpha = gravity_const*this.mass/pow(3, 0.5); 
     this.energy = (3/2)*this.mass*magnitude_v0*magnitude_v0 - alpha/(distance_to_center*pow(3, 0.5)); 
+    // console.log("energy: ", this.energy); 
     this.p = this.l*this.l/(this.mass*alpha); 
-
+    // console.log("mag v: ", magnitude_v0); 
+    // console.log(2*this.l*this.l*this.energy/(this.mass*alpha*alpha)); 
+    // crutch fix for now 
+    if (2*this.l*this.l*this.energy/(this.mass*alpha*alpha) < 1) { 
+        console.log("hello"); 
+        this.e = pow(1 + 2*this.l*this.l*this.energy/(this.mass*alpha*alpha), 0.5); 
+    }
+    else { 
+        this.e = 0; 
+    }
+    console.log(this.e); 
     this.analytic = function(theta) { 
-        var radius = this.p/1000000000; 
+        var radius = (this.p / (1+this.e*cos(theta+theta_0))); 
+        // radius /= 1000000000; 
+        // console.log(this.e, radius); 
         this.x = radius*cos(theta+theta_0) + width/2; 
         this.y = radius*sin(theta+theta_0) + height/2; 
     }
@@ -65,11 +78,12 @@ function body(r0, theta_0, mass, initial_velocity_x, initial_velocity_y, color_n
 const width = 1500; 
 const height = 1500; 
 const gravity_const = 1; 
-var speed1 = 450; 
-var speed2x = 225; 
-var speed2y = 390; 
-var speed3x = 225; 
-var speed3y = 390; 
+// var speed1 = 450;
+var speed1 = 0.0045; 
+var speed2x = 0.0045; 
+var speed2y = 0; 
+var speed3x = 0.0045; 
+var speed3y = 0; 
 let buffer; 
 function setup() { 
     createCanvas(width, height); 
@@ -314,7 +328,7 @@ function time_step_adjustor(x1, y1, x2, y2, x3, y3) {
         time_step = 0.001; 
     }
 }
-var epsilon = 1000;
+var epsilon = 10;
 var totalForces = new Array(6); 
 var theta = 0; 
 var counter = 0; 
