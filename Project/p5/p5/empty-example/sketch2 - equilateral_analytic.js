@@ -23,19 +23,20 @@ function body(r0, theta_0, mass, initial_velocity_x, initial_velocity_y, color_n
     // console.log(2*this.l*this.l*this.energy/(this.mass*alpha*alpha)); 
     // crutch fix for now 
     if (2*this.l*this.l*this.energy/(this.mass*alpha*alpha) < 1) { 
-        console.log("hello"); 
         this.e = pow(1 + 2*this.l*this.l*this.energy/(this.mass*alpha*alpha), 0.5); 
+        // this.e = 0.6;
     }
     else { 
         this.e = 0; 
     }
     console.log(this.e); 
     this.analytic = function(theta) { 
-        var radius = (this.p / (1+this.e*cos(theta+theta_0))); 
+        var radius = (this.p / (1+this.e*cos(theta+Math.PI))); 
         // radius /= 1000000000; 
         // console.log(this.e, radius); 
         this.x = radius*cos(theta+theta_0) + width/2; 
         this.y = radius*sin(theta+theta_0) + height/2; 
+        console.log(radius); 
     }
 
     this.update = function(force_x, force_y) { 
@@ -64,8 +65,8 @@ function body(r0, theta_0, mass, initial_velocity_x, initial_velocity_y, color_n
             fill(0, 250, 154);
             stroke(0, 250, 154); 
         }
-        if (positions.length > 50) { 
-            for (var i = positions.length-1; i > positions.length-50; i--) { 
+        if (positions.length > 1000) { 
+            for (var i = positions.length-1; i > positions.length-1000; i--) { 
                 strokeWeight(1); 
                 ellipse(positions[i][0], positions[i][1], 1, 1); 
             }
@@ -93,9 +94,9 @@ function setup() {
     // body1 = new body(750, 600, 750000000000000000, 0, 0, 1); // BLUE
     // body2 = new body(650, 600, 1000000000000000000, 0, 0, 2); // RED
     // body3 = new body(725, 730, 1000000000000000000, 0, 3); // GREEN
-    body1 = new body(100, 0, 41500000, -speed1, 0, 1); // BLUE
-    body2 = new body(100, 2*Math.PI/3, 41500000, speed2x, speed2y, 2); // RED
-    body3 = new body(100, 4*Math.PI/3, 41500000, speed3x, -speed3y, 3); // GREEN
+    body1 = new body(400, 0, 41500000, -speed1, 0, 1); // BLUE
+    body2 = new body(400, 2*Math.PI/3, 41500000, speed2x, speed2y, 2); // RED
+    body3 = new body(400, 4*Math.PI/3, 41500000, speed3x, -speed3y, 3); // GREEN
 }
 
 // takes in initial forces, sets new x and y for each body
@@ -357,4 +358,8 @@ function draw() {
     body1.show(); 
     body2.show();
     body3.show(); 
+
+    line(body1.x, body1.y, body2.x, body2.y); 
+    line(body1.x, body1.y, body3.x, body3.y); 
+    line(body2.x, body2.y, body3.x, body3.y); 
 }

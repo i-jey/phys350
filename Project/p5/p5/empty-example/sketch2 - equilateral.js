@@ -1,17 +1,21 @@
-var time_step = 0.0001; 
+const width = 1500; 
+const height = 1500; 
+var time_step = 0.00001; 
+var wOffset = width/2; 
+var hOffset = height/2; 
 
-function body(x0, y0, mass, initial_velocity_x, initial_velocity_y, color_num) { 
-    this.x = x0; 
-    this.y = y0; 
+function body(r, theta, mass, mag_v, v_theta, color_num) { 
+    this.x = r*Math.cos(theta) + wOffset; 
+    this.y = r*Math.sin(theta) + hOffset; 
+    
     this.mass = mass; 
-    this.vx = initial_velocity_x;
-    this.vy = initial_velocity_y; 
+    this.vx = mag_v*Math.cos(v_theta);
+    this.vy = mag_v*Math.sin(v_theta); 
     var positions = [[]]; 
 
     this.update = function(force_x, force_y) { 
         var xAcceleration = force_x/this.mass; 
         var yAcceleration = force_y/this.mass; 
-        // console.log(color_num, xAcceleration, yAcceleration); 
         this.vx = this.vx + xAcceleration*time_step; 
         this.vy = this.vy + yAcceleration*time_step; 
         this.x += this.vx*time_step; 
@@ -46,11 +50,9 @@ function body(x0, y0, mass, initial_velocity_x, initial_velocity_y, color_num) {
     }
 }
 
-const width = 1500; 
-const height = 1500; 
 const gravity_const = 1; 
 
-var magSpeed = 500; 
+var magSpeed = 600; 
 var rads_60 = Math.PI*60/180; 
 
 // red speed 
@@ -74,17 +76,29 @@ function setup() {
     // body1 = new body(750, 600, 750000000000000000, 0, 0, 1); // BLUE
     // body2 = new body(650, 600, 1000000000000000000, 0, 0, 2); // RED
     // body3 = new body(725, 730, 1000000000000000000, 0, 3); // GREEN
+
     // body1 = new body(850, 750, 41500000, bSpeedX, bSpeedY, 1); // BLUE
     // body2 = new body(700, 836.6025403784439, 41500000, rSpeedX, rSpeedY, 2); // RED
     // body3 = new body(700, 663.3974596215562, 41500000, gSpeedX, gSpeedY, 3); // GREEN 
-    body1 = new body(800, 626.7949192, 41500000, -magSpeed, 0, 1); // BLUE
-    body2 = new body(700, 800, 41500000, magSpeed*Math.cos(Math.PI*30/180), magSpeed*Math.sin(Math.PI*30/180), 2); // RED
-    body3 = new body(900, 800, 41500000, -magSpeed*Math.sin(Math.PI*30/180), -magSpeed*Math.cos(Math.PI*30/180), 3); // GREEN 
-}
 
-// takes in initial forces, sets new x and y for each body
-function rk4(force1_x, force1_y, force2_x, force2_y, force3_x, force3_y) { 
+    // body1 = new body(800, 626.7949192, 41500000, -magSpeed, 0, 1); // BLUE
+    // body2 = new body(700, 800, 41500000, magSpeed*Math.cos(Math.PI*30/180), magSpeed*Math.sin(Math.PI*30/180), 2); // RED
+    // body3 = new body(900, 800, 41500000, magSpeed*Math.sin(Math.PI*30/180), -magSpeed*Math.cos(Math.PI*30/180), 3); // GREEN 
+
+    var radius = 75; 
+    // SWITCHING TO POLAR DEFINITION 
+    body1 = new body(radius, Math.PI/2, 41500000, magSpeed, Math.PI/2+Math.PI/2, 1); // BLUE
+    body2 = new body(radius, Math.PI/2+2*Math.PI/3, 41500000, magSpeed, Math.PI/2+2*Math.PI/3+Math.PI/2, 2); // RED
+    body3 = new body(radius, Math.PI/2+4*Math.PI/3, 41500000, magSpeed, Math.PI/2+4*Math.PI/3+Math.PI/2, 3); // GREEN 
     
+    var bodies = [body1, body2, body3]; 
+}
+var k1, k2, k3, k4; 
+function rk4() { 
+    for (var i = 0; i < bodies.length; i++) { 
+        k1x = time_step*bodies[i].vx; 
+        k1y = time_step*bodies[i].vy; 
+    }
 }
 
 function force(mass1, mass2, x1, y1, x2, y2) { 
@@ -135,7 +149,7 @@ function totalForce_Selector(bodyNum, x1, y1, x2, y2, x3, y3, force12, force13, 
     }
 }
 
-var epsilon = 10;
+var epsilon = 0;
 var totalForces = new Array(6); 
 var counter = 0; 
 function draw() { 
@@ -146,12 +160,11 @@ function draw() {
     var force23 = force(body2.mass, body3.mass, body2.x, body2.y, body3.x, body3.y); 
     totalForces = totalForce(body1.x, body1.y, body2.x, body2.y, body3.x, body3.y, force12, force13, force23); 
     
-    // rk4(totalForces[0], totalForces[1], totalForces[2], totalForces[3], totalForces[4], totalForces[5]); 
     body1.update(totalForces[0], totalForces[1]); 
     body2.update(totalForces[2], totalForces[3]); 
     body3.update(totalForces[4], totalForces[5]);
 
-    if (counter % 1 == 0) { 
+    if (counter % 2 == 0) { 
         body1.show(); 
         body2.show();
         body3.show(); 
