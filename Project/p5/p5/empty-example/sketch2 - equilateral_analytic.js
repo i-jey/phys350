@@ -65,8 +65,8 @@ function body(r0, theta_0, mass, initial_velocity_x, initial_velocity_y, color_n
             fill(0, 250, 154);
             stroke(0, 250, 154); 
         }
-        if (positions.length > 1000) { 
-            for (var i = positions.length-1; i > positions.length-1000; i--) { 
+        if (positions.length > 50) { 
+            for (var i = positions.length-1; i > positions.length-50; i--) { 
                 strokeWeight(1); 
                 ellipse(positions[i][0], positions[i][1], 1, 1); 
             }

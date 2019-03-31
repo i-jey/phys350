@@ -1,6 +1,6 @@
 const width = 1500; 
 const height = 1500; 
-var time_step = 0.00001; 
+var time_step = 0.001; 
 var wOffset = width/2; 
 var hOffset = height/2; 
 
@@ -52,7 +52,7 @@ function body(r, theta, mass, mag_v, v_theta, color_num) {
 
 const gravity_const = 1; 
 
-var magSpeed = 600; 
+var magSpeed = 1000; 
 var rads_60 = Math.PI*60/180; 
 
 // red speed 
@@ -164,7 +164,7 @@ function draw() {
     body2.update(totalForces[2], totalForces[3]); 
     body3.update(totalForces[4], totalForces[5]);
 
-    if (counter % 2 == 0) { 
+    if (counter % 25 == 0) { 
         body1.show(); 
         body2.show();
         body3.show(); 
