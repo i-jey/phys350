@@ -37,14 +37,22 @@ function body(r, theta, mass, mag_v, v_theta, color_num) {
             fill(240, 128, 128); 
             // stroke(240, 128, 128); 
         }
-        else { 
+        else if (color_num == 3) { 
             fill(0, 250, 154);
             // stroke(0, 250, 154); 
+        }
+        else { 
+            fill(200, 100, 50); 
         }
 
         // stroke(0); 
         strokeWeight(1);
-        ellipse(this.x, this.y, 5, 5); 
+        if (color_num == 2) { 
+            ellipse(this.x, this.y, 25, 25); 
+        }
+        else { 
+            ellipse(this.x, this.y, 5, 5); 
+        }
     }
 }
 
@@ -75,21 +83,22 @@ function setup() {
     // SWITCHING TO POLAR DEFINITION 
 
     // EQUILATERAL CONFIGURATION 
-    // body1 = new body(radius, 0, 41500000, magSpeed, Math.PI/2, 1); // BLUE
-    // body2 = new body(radius, 2*Math.PI/3, 41500000, magSpeed, 2*Math.PI/3+Math.PI/2, 2); // RED
-    // body3 = new body(radius, 4*Math.PI/3, 41500000, magSpeed, 4*Math.PI/3+Math.PI/2, 3); // GREEN 
+    body1 = new body(radius, Math.PI/3, 41500000, -2*magSpeed, Math.PI/4, 1); // BLUE
+    body2 = new body(radius, 0, 5*41500000, magSpeed, 2*Math.PI/3+Math.PI/2, 2); // RED
+    body3 = new body(radius, 2*Math.PI/3, 41500000, 2*magSpeed, 2*Math.PI/3+Math.PI/2, 3); // GREEN 
+    body4 = new body(2*radius, 4*Math.PI/3, 41500000, 2*magSpeed, 4*Math.PI/3+Math.PI/2, 4);
 
     // PYTHAGOREAN 
-    body1 = new body(4*radius/5, 0, 3*51500000, 500, 0, 1); // BLUE
-    body2 = new body(4*radius, Math.PI/12, 3*51500000, -500, Math.PI/2, 2); // RED
-    body3 = new body(4*radius*3/4, -Math.PI/6, 5*51500000, -600, Math.PI/4, 3); // GREEN 
+    // body1 = new body(4*radius/5, 0, 3*51500000, -500, -600, 1); // BLUE
+    // body2 = new body(4*radius, Math.PI/12, 5*51500000, -500, Math.PI/2, 2); // RED
+    // body3 = new body(4*radius*3/4, -Math.PI/6, 5*51500000, -600, Math.PI/4, 3); // GREEN 
     body1.x-=200; 
     body2.x-=200; 
     body3.x-=200; 
 
 
 
-    bodies = [body1, body2, body3];    
+    bodies = [body1, body2];    
     noLoop(); 
 }
 
@@ -132,43 +141,39 @@ function draw() {
     // background(255); 
     var c = document.getElementById("defaultCanvas0");
     var ctx = c.getContext("2d");
-    var force1 = getForceForBody(1); 
-    var force2 = getForceForBody(2); 
-    var force3 = getForceForBody(3); 
-    body1.update(force1[0], force1[1]); 
-    body2.update(force2[0], force2[1]); 
-    body3.update(force3[0], force3[1]);
-    timeCounter += time_step; 
-    positions1.push([timeCounter, body1.x, body1.y]); 
-
-    if (counter % 1 == 0) { 
-        body1.show(); 
-        body2.show();
-        body3.show(); 
-        // line(body1.x, body1.y, body2.x, body2.y); 
-        // line(body1.x, body1.y, body3.x, body3.y); 
-        // line(body2.x, body2.y, body3.x, body3.y); 
-    }
-    ctx.clearRect(width/2 - 203, height/2 - 45, 70, 25); 
-    fill(0); 
-    strokeWeight(0); 
-    text("Time: " + Math.round(timeCounter*1000)/1000, width/2 - 200, height/2 - 25);
-    counter++; 
     
-    // if (timeCounter >= TIME_END) { 
-    //     noLoop(); 
-    //     var val1 = positions1.toString(); 
-    //     var val2 = positions2.toString(); 
-    //     var val3 = positions3.toString(); 
-    //     console.log(val1); 
-    //     console.log(val2); 
-    //     console.log(val3); 
-    // }
-    // console.log(timeCounter % 0.2); 
-    if (timeCounter > 4) {
-        if (timeCounter % 0.2 < pow(10, -3)) { 
-            // noLoop(); 
-            timeCounter += time_step; 
-        }
+    // var force2 = getForceForBody(2); 
+    // var force3 = getForceForBody(3);
+    // body2.update(force2[0], force2[1]); 
+    // body3.update(force3[0], force3[1]);
+
+    if (timeCounter < 700) { 
+        var force1 = getForceForBody(1); 
+        body1.update(force1[0], force1[1]); 
+        body1.show(); 
     }
+    else if (timeCounter < 720) { 
+        // background(255); 
+    }
+    else if (timeCounter < 721) { 
+        bodies.push(body3); 
+        bodies.shift(); 
+    }
+    else if (timeCounter < 1400) { 
+        var force3 = getForceForBody(2); 
+        body3.update(force3[0], force3[1]); 
+        body3.show(); 
+    }
+    else if (timeCounter< 1450) { 
+        bodies.push(body4);
+        bodies.splice(1, 1); 
+        console.log(bodies); 
+    }
+    else if (timeCounter < 2100) { 
+        var force4 = getForceForBody(2); 
+        body4.update(force4[0], force4[1]); 
+        body4.show(); 
+    }
+    timeCounter += 1; 
+    body2.show(); 
 }

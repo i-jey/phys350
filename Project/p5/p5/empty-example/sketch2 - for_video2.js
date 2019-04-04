@@ -44,7 +44,7 @@ function body(r, theta, mass, mag_v, v_theta, color_num) {
 
         // stroke(0); 
         strokeWeight(1);
-        ellipse(this.x, this.y, 5, 5); 
+        ellipse(this.x, this.y, 35, 35); 
     }
 }
 
@@ -71,25 +71,21 @@ function setup() {
     buffer = createGraphics(width, height); 
     buffer.background(255); 
 
-    var radius = 75; 
+    var radius = 175; 
     // SWITCHING TO POLAR DEFINITION 
-
-    // EQUILATERAL CONFIGURATION 
-    // body1 = new body(radius, 0, 41500000, magSpeed, Math.PI/2, 1); // BLUE
-    // body2 = new body(radius, 2*Math.PI/3, 41500000, magSpeed, 2*Math.PI/3+Math.PI/2, 2); // RED
-    // body3 = new body(radius, 4*Math.PI/3, 41500000, magSpeed, 4*Math.PI/3+Math.PI/2, 3); // GREEN 
-
-    // PYTHAGOREAN 
-    body1 = new body(4*radius/5, 0, 3*51500000, 500, 0, 1); // BLUE
-    body2 = new body(4*radius, Math.PI/12, 3*51500000, -500, Math.PI/2, 2); // RED
-    body3 = new body(4*radius*3/4, -Math.PI/6, 5*51500000, -600, Math.PI/4, 3); // GREEN 
-    body1.x-=200; 
-    body2.x-=200; 
-    body3.x-=200; 
-
-
-
+    body1 = new body(radius, 0, 41500000, magSpeed, Math.PI/2, 1); // BLUE
+    body2 = new body(radius, 2*Math.PI/3, 41500000, magSpeed, 2*Math.PI/3+Math.PI/2, 2); // RED
+    body3 = new body(radius, 4*Math.PI/3, 41500000, magSpeed, 4*Math.PI/3+Math.PI/2, 3); // GREEN 
     bodies = [body1, body2, body3];    
+    
+
+    // hard coded positions for video 
+    body1.x -= 200; 
+    body1.y += 100; 
+    body2.x += 200; 
+    body2.y -= 60; 
+    body3.x += 50; 
+    body3.y -= 50;
     noLoop(); 
 }
 
@@ -122,53 +118,78 @@ function mouseClicked() {
     loop(); 
 }
 
+function mouseMoved() { 
+    console.log(event.x, event.y); 
+}
+
 var epsilon = 0;
 var counter = 0; 
-var positions1 = []; 
-var positions2 = []; 
-var positions3 = []; 
+
+var mass1 = 50; 
+var mass2 = 50; 
+var mass3 = 50; 
+
+var radius = 175; 
 
 function draw() { 
-    // background(255); 
-    var c = document.getElementById("defaultCanvas0");
-    var ctx = c.getContext("2d");
-    var force1 = getForceForBody(1); 
-    var force2 = getForceForBody(2); 
-    var force3 = getForceForBody(3); 
-    body1.update(force1[0], force1[1]); 
-    body2.update(force2[0], force2[1]); 
-    body3.update(force3[0], force3[1]);
-    timeCounter += time_step; 
-    positions1.push([timeCounter, body1.x, body1.y]); 
-
-    if (counter % 1 == 0) { 
+    //background(255); 
+    var x, y; 
+    // draw initial bodies
+    if (timeCounter < 50) { 
+        // wait 
+    } 
+    else if (timeCounter < 100) { 
+        body1 = new body(radius, 0, 41500000, magSpeed, Math.PI/2, 1); // BLUE
         body1.show(); 
-        body2.show();
+    }
+    else if (timeCounter < 150) { 
+        body2 = new body(radius, 2*Math.PI/3, 41500000, magSpeed, 2*Math.PI/3+Math.PI/2, 2); // RED
+        body2.show(); 
+    }
+    else if (timeCounter < 200) { 
+        body3 = new body(radius, 4*Math.PI/3, 41500000, magSpeed, 4*Math.PI/3+Math.PI/2, 3); // GREEN 
         body3.show(); 
-        // line(body1.x, body1.y, body2.x, body2.y); 
-        // line(body1.x, body1.y, body3.x, body3.y); 
-        // line(body2.x, body2.y, body3.x, body3.y); 
     }
-    ctx.clearRect(width/2 - 203, height/2 - 45, 70, 25); 
-    fill(0); 
-    strokeWeight(0); 
-    text("Time: " + Math.round(timeCounter*1000)/1000, width/2 - 200, height/2 - 25);
-    counter++; 
-    
-    // if (timeCounter >= TIME_END) { 
-    //     noLoop(); 
-    //     var val1 = positions1.toString(); 
-    //     var val2 = positions2.toString(); 
-    //     var val3 = positions3.toString(); 
-    //     console.log(val1); 
-    //     console.log(val2); 
-    //     console.log(val3); 
+    else if (timeCounter < 220) { 
+        strokeWeight(1); 
+        line(body1.x, body1.y, body2.x, body2.y); 
+    }
+    else if (timeCounter < 240) { 
+        line(body2.x, body2.y, body3.x, body3.y); 
+    }
+    else if (timeCounter < 260) { 
+        line(body1.x, body1.y, body3.x, body3.y); 
+    }
+    else if (timeCounter < 300) { 
+        fill(0);
+        y = (body2.y+body3.y)/2;  
+        x = (body1.x+body2.x+body3.x)/3; 
+        ellipse(x, y, 15); 
+    }
+    else if (timeCounter < 350) { 
+        // lines to centre 
+        y = (body2.y+body3.y)/2;  
+        x = (body1.x+body2.x+body3.x)/3; 
+        line(body1.x, body1.y, x, y); 
+        line(body2.x, body2.y, x, y); 
+        line(body3.x, body3.y, x, y); 
+    }
+    // else if (timeCounter < 570) { 
+    //     background(255); 
+    //     y = (body2.y+body3.y)/2+20*Math.cos(timeCounter*Math.PI*2/180);  
+    //     x = (body1.x+body2.x+body3.x)/3+20*Math.sin(timeCounter*Math.PI*2/180); 
+    //     body1.show(); 
+    //     body2.show(); 
+    //     body3.show(); 
+    //     fill(0); 
+    //     ellipse(x, y, 15); 
+    //     line(body1.x, body1.y, body2.x, body2.y); 
+    //     line(body2.x, body2.y, body3.x, body3.y); 
+    //     line(body1.x, body1.y, body3.x, body3.y); 
+    //     line(body1.x, body1.y, x, y); 
+    //     line(body2.x, body2.y, x, y); 
+    //     line(body3.x, body3.y, x, y);
     // }
-    // console.log(timeCounter % 0.2); 
-    if (timeCounter > 4) {
-        if (timeCounter % 0.2 < pow(10, -3)) { 
-            // noLoop(); 
-            timeCounter += time_step; 
-        }
-    }
+    // console.log(timeCounter); 
+    timeCounter++;
 }

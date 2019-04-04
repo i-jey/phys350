@@ -73,23 +73,19 @@ function setup() {
 
     var radius = 75; 
     // SWITCHING TO POLAR DEFINITION 
-
-    // EQUILATERAL CONFIGURATION 
-    // body1 = new body(radius, 0, 41500000, magSpeed, Math.PI/2, 1); // BLUE
-    // body2 = new body(radius, 2*Math.PI/3, 41500000, magSpeed, 2*Math.PI/3+Math.PI/2, 2); // RED
-    // body3 = new body(radius, 4*Math.PI/3, 41500000, magSpeed, 4*Math.PI/3+Math.PI/2, 3); // GREEN 
-
-    // PYTHAGOREAN 
-    body1 = new body(4*radius/5, 0, 3*51500000, 500, 0, 1); // BLUE
-    body2 = new body(4*radius, Math.PI/12, 3*51500000, -500, Math.PI/2, 2); // RED
-    body3 = new body(4*radius*3/4, -Math.PI/6, 5*51500000, -600, Math.PI/4, 3); // GREEN 
-    body1.x-=200; 
-    body2.x-=200; 
-    body3.x-=200; 
-
-
-
+    body1 = new body(radius, 0, 41500000, magSpeed, Math.PI/2, 1); // BLUE
+    body2 = new body(radius, 2*Math.PI/3, 41500000, magSpeed, 2*Math.PI/3+Math.PI/2, 2); // RED
+    body3 = new body(radius, 4*Math.PI/3, 41500000, magSpeed, 4*Math.PI/3+Math.PI/2, 3); // GREEN 
     bodies = [body1, body2, body3];    
+    
+
+    // hard coded positions for video 
+    body1.x -= 200; 
+    body1.y += 100; 
+    body2.x += 200; 
+    body2.y -= 60; 
+    body3.x += 50; 
+    body3.y -= 50;
     noLoop(); 
 }
 
@@ -122,53 +118,80 @@ function mouseClicked() {
     loop(); 
 }
 
+function mouseMoved() { 
+    console.log(event.x, event.y); 
+}
+
 var epsilon = 0;
 var counter = 0; 
-var positions1 = []; 
-var positions2 = []; 
-var positions3 = []; 
+
+var mass1 = 50; 
+var mass2 = 50; 
+var mass3 = 50; 
 
 function draw() { 
-    // background(255); 
-    var c = document.getElementById("defaultCanvas0");
-    var ctx = c.getContext("2d");
-    var force1 = getForceForBody(1); 
-    var force2 = getForceForBody(2); 
-    var force3 = getForceForBody(3); 
-    body1.update(force1[0], force1[1]); 
-    body2.update(force2[0], force2[1]); 
-    body3.update(force3[0], force3[1]);
-    timeCounter += time_step; 
-    positions1.push([timeCounter, body1.x, body1.y]); 
+    //background(255); 
+    // setTimeout(first(), 1000); 
 
-    if (counter % 1 == 0) { 
-        body1.show(); 
-        body2.show();
-        body3.show(); 
-        // line(body1.x, body1.y, body2.x, body2.y); 
-        // line(body1.x, body1.y, body3.x, body3.y); 
-        // line(body2.x, body2.y, body3.x, body3.y); 
+    // draw initial bodies 
+    if (timeCounter < 100) { 
+        fill(0); 
+        ellipse(body1.x, body1.y, 50); 
+        ellipse(body2.x, body2.y, 50); 
+        ellipse(body3.x, body3.y, 50);
     }
-    ctx.clearRect(width/2 - 203, height/2 - 45, 70, 25); 
-    fill(0); 
-    strokeWeight(0); 
-    text("Time: " + Math.round(timeCounter*1000)/1000, width/2 - 200, height/2 - 25);
-    counter++; 
-    
-    // if (timeCounter >= TIME_END) { 
-    //     noLoop(); 
-    //     var val1 = positions1.toString(); 
-    //     var val2 = positions2.toString(); 
-    //     var val3 = positions3.toString(); 
-    //     console.log(val1); 
-    //     console.log(val2); 
-    //     console.log(val3); 
-    // }
-    // console.log(timeCounter % 0.2); 
-    if (timeCounter > 4) {
-        if (timeCounter % 0.2 < pow(10, -3)) { 
-            // noLoop(); 
-            timeCounter += time_step; 
+    // increase masses
+    else if (timeCounter < 300) { 
+        if (mass1 < 55) { 
+            if (timeCounter % 1 == 0) {
+                mass1 += 0.5; 
+                fill(100, 200, 255); 
+                ellipse(body1.x, body1.y, mass1)
+            }
+        }
+        if (mass2 < 25*4) {
+            if (timeCounter % 1 == 0) { 
+                        mass2 += 0.5; 
+                        fill(240, 128, 128); 
+                        ellipse(body2.x, body2.y, mass2); 
+            }
+        }
+        if (mass3 < 25*3) {
+            if (timeCounter % 1 == 0) { 
+                        mass3 += 0.5; 
+                        fill(0, 250, 154);
+                        ellipse(body3.x, body3.y, mass3); 
+            }
+        }
+        fill(0); 
+        text(26); 
+        text("m1", body1.x-6, body1.y+1); 
+        text("m2", body2.x-5, body2.y+2); 
+        text("m3", body3.x-6, body3.y+1)
+    }
+    // line to an arbritrary point 
+    else if (timeCounter < 360) { 
+        strokeWeight(2); 
+        var randX = body2.x-50; 
+        var randY = body2.y+150; 
+        ellipse(randX, randY, 10, 10); 
+
+        if (timeCounter > 350) {
+            stroke(100, 200, 255); 
+            line(body1.x, body1.y, randX, randY); 
+            stroke(240, 128, 128); 
+            line(body2.x, body2.y, randX, randY);
+            stroke(0, 250, 154); 
+            line(body3.x, body3.y, randX, randY);
+            stroke(0); 
+            strokeWeight(1); 
+            fill(0); 
+            textSize(26);
+            text("r1", (body1.x+randX)/2, 5+(body1.y+randY)/2); 
+            text("r2", (body2.x+randX)/2, 25+(body2.y+randY)/2); 
+            text("r3", (body3.x+randX)/2, 15+(body3.y+randY)/2); 
         }
     }
+    // console.log(timeCounter); 
+    timeCounter++;
 }
