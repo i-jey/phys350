@@ -84,9 +84,9 @@ function setup() {
     body2 = new body(radius, 2*Math.PI/3, 10000000, speed2x, speed2y, 2); // RED
     body3 = new body(radius, 4*Math.PI/3, 10000000, speed3x, -speed3y, 3); // GREEN
     
-    body1.e = 0.5; 
-    body2.e = 0.5; 
-    body3.e = 0.5; 
+    body1.e = 0.6; 
+    body2.e = 0.6; 
+    body3.e = 0.6; 
     noLoop(); 
 }
 
@@ -113,27 +113,27 @@ function draw() {
     counter++; 
 
     if (counter % 1 == 0){ 
-        theta += 0.01; 
+        theta += 0.1; 
     }
     fill(0); 
     strokeWeight(0); 
-    ctx.clearRect(width/2 + 95+200, height/2 - 55, 160, 50); 
-    text("Angle: " + Math.round(1000*theta*180/Math.PI)/1000, width/2 + 100+200, height/2 - 20);
-    text("Eccentricity: " + Math.round(body1.e*100)/100 + ", " + Math.round(body2.e*100)/100 + ", " + Math.round(body3.e*100)/100, width/2 + 100+200, height/2 - 40);
+    // ctx.clearRect(width/2 + 95+200, height/2 - 55, 160, 50); 
+    // text("Angle: " + Math.round(1000*theta*180/Math.PI)/1000, width/2 + 100+200, height/2 - 20);
+    // text("Eccentricity: " + Math.round(body1.e*100)/100 + ", " + Math.round(body2.e*100)/100 + ", " + Math.round(body3.e*100)/100, width/2 + 100+200, height/2 - 40);
     body1.show(); 
-    // body2.show();
-    // body3.show(); 
+    body2.show();
+    body3.show(); 
     fill(0); 
-    ellipse((body1.x+body2.x+body3.x)/3, (body1.y+body2.y+body3.y)/3, 15, 15); 
+    // ellipse((body1.x+body2.x+body3.x)/3, (body1.y+body2.y+body3.y)/3, 15, 15); 
     // console.log(theta % 0.2);
     if (theta % 0.2 < pow(10, -2)) { 
         // noLoop(); 
         theta += 0.01; 
     }
-    // stroke(100, 200, 255); 
-    // line(body1.x, body1.y, body2.x, body2.y); 
-    // stroke(240, 128, 128); 
-    // line(body1.x, body1.y, body3.x, body3.y); 
-    // stroke(0, 250, 154);
-    // line(body2.x, body2.y, body3.x, body3.y); 
+    stroke(100, 200, 255); 
+    line(body1.x, body1.y, body2.x, body2.y); 
+    stroke(240, 128, 128); 
+    line(body1.x, body1.y, body3.x, body3.y); 
+    stroke(0, 250, 154);
+    line(body2.x, body2.y, body3.x, body3.y); 
 }

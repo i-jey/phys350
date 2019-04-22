@@ -1,11 +1,12 @@
 const width = 1500; 
 const height = 1500; 
-var time_step = 0.001; 
+var time_step = 0.0001; 
 var timeCounter = 0; 
 var TIME_END = 2; 
 var wOffset = width/2; 
 var hOffset = height/2; 
 var bodies = []; 
+
 function body(r, theta, mass, mag_v, v_theta, color_num) { 
     this.x = r*Math.cos(theta) + wOffset; 
     this.y = r*Math.sin(theta) + hOffset; 
@@ -13,7 +14,7 @@ function body(r, theta, mass, mag_v, v_theta, color_num) {
     this.mass = mass; 
     this.vx = mag_v*Math.cos(v_theta);
     this.vy = mag_v*Math.sin(v_theta); 
-    var positions = [[]]; 
+    var positions = [[]]; \
 
     this.update = function(force_x, force_y) { 
         var xAcceleration = force_x/this.mass; 
@@ -22,6 +23,7 @@ function body(r, theta, mass, mag_v, v_theta, color_num) {
         this.vy = this.vy + yAcceleration*time_step; 
         this.x += this.vx*time_step; 
         this.y += this.vy*time_step; 
+
         positions.push([timeCounter, this.x, this.y]); 
     }
     this.update_direct = function(x, y) { 
@@ -80,9 +82,16 @@ function setup() {
     // body3 = new body(radius, 4*Math.PI/3, 41500000, magSpeed, 4*Math.PI/3+Math.PI/2, 3); // GREEN 
 
     // PYTHAGOREAN 
-    body1 = new body(4*radius/5, 0, 3*51500000, 500, 0, 1); // BLUE
-    body2 = new body(4*radius, Math.PI/12, 3*51500000, -500, Math.PI/2, 2); // RED
-    body3 = new body(4*radius*3/4, -Math.PI/6, 5*51500000, -600, Math.PI/4, 3); // GREEN 
+    // body1 = new body(4*radius/5, 0, 3*51500000, 500, 0, 1); // BLUE
+    // body2 = new body(4*radius, Math.PI/12, 3*51500000, -500, Math.PI/2, 2); // RED
+    // body3 = new body(4*radius*3/4, -Math.PI/6, 5*51500000, -600, Math.PI/4, 3); // GREEN 
+
+    // 0 initial velocity
+    magSpeed = 400; 
+    body1 = new body(radius, 0, 101500000, magSpeed, Math.PI/3, 1); // BLUE
+    body2 = new body(radius, 2*Math.PI/3, 41500000, magSpeed, Math.PI/3+Math.PI/2, 2); // RED
+    body3 = new body(radius, 4*Math.PI/3, 41500000, magSpeed, Math.PI/2, 3); // GREEN 
+
     body1.x-=200; 
     body2.x-=200; 
     body3.x-=200; 
@@ -106,7 +115,7 @@ function getForceForBody(bodyNum) {
     var forceMagnitude = 0; 
     var theta; 
 
-    for (var i = 0; i < bodies.length; i++) { 
+    for (var i = 0; i < bodies.length; i++) { \
         if (i==index) { 
             continue; 
         } 
@@ -127,32 +136,44 @@ var counter = 0;
 var positions1 = []; 
 var positions2 = []; 
 var positions3 = []; 
-
+var FRAME_RATE = 2; 
 function draw() { 
     // background(255); 
     var c = document.getElementById("defaultCanvas0");
     var ctx = c.getContext("2d");
-    var force1 = getForceForBody(1); 
-    var force2 = getForceForBody(2); 
-    var force3 = getForceForBody(3); 
-    body1.update(force1[0], force1[1]); 
-    body2.update(force2[0], force2[1]); 
-    body3.update(force3[0], force3[1]);
-    timeCounter += time_step; 
-    positions1.push([timeCounter, body1.x, body1.y]); 
 
-    if (counter % 1 == 0) { 
-        body1.show(); 
-        body2.show();
-        body3.show(); 
+
+    for (var i = 0; i < bodies.length; i++) { 
+        var force = getForceForBody(i+1); 
+        bodies[i].update(force[0], force[1]);
+
+        if (counter % FRAME_RATE == 0) { 
+            bodies[i].show(); 
+        }
+    }
+    
+    // var force1 = getForceForBody(1); 
+    // var force2 = getForceForBody(2); 
+    // var force3 = getForceForBody(3); 
+    // body1.update(force1[0], force1[1]); 
+    // body2.update(force2[0], force2[1]); 
+    // body3.update(force3[0], force3[1]);
+    timeCounter += time_step; 
+
+    // if (counter % 1 == 0) { 
+        // body1.show(); 
+        // body2.show();
+        // body3.show(); 
+        // body4.show();
         // line(body1.x, body1.y, body2.x, body2.y); 
         // line(body1.x, body1.y, body3.x, body3.y); 
         // line(body2.x, body2.y, body3.x, body3.y); 
-    }
-    ctx.clearRect(width/2 - 203, height/2 - 45, 70, 25); 
+    // }
+    
+    ctx.clearRect(width/2 - 253, height/2 - 170, 70, 25); 
     fill(0); 
     strokeWeight(0); 
-    text("Time: " + Math.round(timeCounter*1000)/1000, width/2 - 200, height/2 - 25);
+    text("Time: " + Math.round(timeCounter*1000)/1000, width/2 - 250, height/2 - 150);
     counter++; 
     
     // if (timeCounter >= TIME_END) { 

@@ -10,8 +10,7 @@ function body(r0, theta_0, vtheta_0, velocity_0, mass1, mass2, color_num) {
     this.r = 0; 
     this.e = 0; 
     // initial position
-    // this.x = this.r0*cos(this.theta_0)+1000; 
-    // this.y = this.r0*sin(this.theta_0)+1000; 
+    // this.x = this.r0z*sin(this.theta_0)+1000; 
     
     // integration constants 
     this.l = this.r0*this.v0*sin(this.a);
